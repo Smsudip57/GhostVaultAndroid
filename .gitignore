@@ -1,0 +1,31 @@
+# Gradle & Build Caches
+.gradle/
+**/build/
+local.properties
+*.iml
+*.hprof
+*.log
+
+# Android Studio & JetBrains IDE
+.idea/
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Secrets & Private Firebase Credentials
+app/google-services.json
+*.keystore
+*.jks
+
+# Compiled Binaries
+*.apk
+*.aab
+
+# Coursework & Test Folders
+docs/
+tests/

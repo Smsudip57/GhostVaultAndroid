@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Optional: replace all four placeholders to activate Firebase in Settings > Cloud export. -->
+    <string name="firebase_app_id">1:704834866495:android:4cbcbd43df20033114578a</string>
+    <string name="firebase_api_key">AIzaSyChPDKbFDk54PjNWsiRGb9zSTl7FXZeP80</string>
+    <string name="firebase_project_id">ghostvault01</string>
+    <string name="firebase_database_url">https://ghostvault01-default-rtdb.firebaseio.com</string>
+    <string name="default_web_client_id">704834866495-cjbhb6l8lndv4khjcllcqe7tbor117qp.apps.googleusercontent.com</string>
+</resources>

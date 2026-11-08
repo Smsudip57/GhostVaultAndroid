@@ -1,0 +1,9 @@
+<resources>
+    <color name="gv_primary">#6255CB</color>
+    <color name="gv_primary_dark">#BFB7FF</color>
+    <color name="gv_surface">#F7F6FB</color>
+    <color name="gv_ink">#24243C</color>
+    <color name="gv_muted">#706F84</color>
+    <color name="gv_white">#FFFFFF</color>
+    <color name="gv_ring_track">#EAE7F4</color>
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GhostVault</string>
+    <string name="brand_name">ghostvault.</string>
+    <string name="cloud_title">Cloud export</string>
+</resources>
