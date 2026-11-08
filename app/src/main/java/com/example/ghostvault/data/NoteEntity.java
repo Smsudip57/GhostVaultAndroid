@@ -14,6 +14,8 @@ public class NoteEntity {
     public String encryptedTitle;
     @ColumnInfo(name = "encrypted_body")
     public String encryptedBody;
+    @ColumnInfo(name = "encrypted_location")
+    public String encryptedLocation;
     @ColumnInfo(name = "created_at")
     public long createdAt;
     @ColumnInfo(name = "updated_at")

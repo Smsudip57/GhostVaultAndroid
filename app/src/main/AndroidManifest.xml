@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Optional Firebase encrypted cloud export; offline notes require no internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Location tracking for notes created in the vault -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:name=".GhostVaultApp"
         android:allowBackup="false"

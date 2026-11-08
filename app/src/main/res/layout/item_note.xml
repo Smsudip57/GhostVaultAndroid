@@ -18,6 +18,31 @@
             android:layout_height="wrap_content" android:layout_marginTop="9dp"
             android:textColor="?attr/colorOnSurfaceVariant" android:textSize="14sp"
             android:maxLines="2" android:ellipsize="end" />
+        <LinearLayout
+            android:id="@+id/noteLocationRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_location"
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="@null" />
+            <TextView
+                android:id="@+id/noteLocation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
         <TextView android:id="@+id/noteUpdated" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:layout_marginTop="12dp"
             android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />

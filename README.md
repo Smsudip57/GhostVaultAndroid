@@ -12,7 +12,8 @@ A local-first, zero-knowledge encrypted notebook for Android featuring a **plaus
 
 ## Key Highlights
 
-- **Zero-Knowledge Encryption:** Note titles and bodies are encrypted locally using AES-256-GCM. Plaintext notes and vault passwords are never stored on disk or sent over the network.
+- **Zero-Knowledge Encryption:** Note titles, bodies, and creation location metadata are encrypted locally using AES-256-GCM. Plaintext notes and vault passwords are never stored on disk or sent over the network.
+- **Location-Aware Creation Metadata:** When a new note is created, the device's location (address locality and coordinates) is automatically captured, encrypted with the vault key, and displayed alongside the note in the note list and editor. Users can search notes by location, retry capture, or remove the location tag before saving.
 - **Plausible Deniability (Decoy Vault):**
   - Entering **six unique and completely distinct wrong passwords** creates a persistent, empty decoy notebook.
   - Repeating the same wrong password will **never** trigger the decoy, preventing intruders from discovering the spoofing behavior.
@@ -67,6 +68,8 @@ app/src/main/
 │   │   ├── NoteDao.java                 // Room database queries and CRUD
 │   │   ├── GhostDatabase.java           // Room database instance
 │   │   └── Disk.java                    // Background worker thread executor
+│   ├── location/
+│   │   └── LocationHelper.java          // Location capture & geocoding resolution
 │   ├── ui/
 │   │   ├── BaseSecureActivity.java      // Base activity with FLAG_SECURE
 │   │   ├── SetupActivity.java           // First-launch password creation

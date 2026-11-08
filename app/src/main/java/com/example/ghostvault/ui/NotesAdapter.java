@@ -17,11 +17,12 @@ import java.util.Locale;
 public final class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Holder> {
     public static final class Entry {
         public final long id, updated;
-        public final String title, preview;
-        public Entry(long id, String title, String preview, long updated) {
+        public final String title, preview, location;
+        public Entry(long id, String title, String preview, String location, long updated) {
             this.id = id;
             this.title = title;
             this.preview = preview;
+            this.location = location;
             this.updated = updated;
         }
     }
@@ -48,9 +49,14 @@ public final class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Holder
         visible.clear();
         for (Entry entry : all) {
             if (search.isEmpty() || entry.title.toLowerCase(Locale.ROOT).contains(search)
-                    || entry.preview.toLowerCase(Locale.ROOT).contains(search)) visible.add(entry);
+                    || entry.preview.toLowerCase(Locale.ROOT).contains(search)
+                    || (entry.location != null && entry.location.toLowerCase(Locale.ROOT).contains(search))) {
+                visible.add(entry);
+            }
         }
-        notifyDataSetChanged();
+        try {
+            notifyDataSetChanged();
+        } catch (Exception ignored) { }
     }
 
     @NonNull @Override public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -62,6 +68,12 @@ public final class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Holder
         Entry entry = visible.get(position);
         holder.title.setText(entry.title.trim().isEmpty() ? "Untitled note" : entry.title);
         holder.preview.setText(entry.preview.trim().isEmpty() ? "No additional text" : entry.preview);
+        if (entry.location != null && !entry.location.trim().isEmpty()) {
+            holder.locationRow.setVisibility(View.VISIBLE);
+            holder.location.setText(entry.location.trim());
+        } else {
+            holder.locationRow.setVisibility(View.GONE);
+        }
         holder.date.setText(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                 .format(new Date(entry.updated)));
         holder.itemView.setOnClickListener(v -> listener.onTap(entry.id));
@@ -71,12 +83,15 @@ public final class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Holder
     @Override public int getItemCount() { return visible.size(); }
 
     static final class Holder extends RecyclerView.ViewHolder {
-        final TextView title, preview, date;
+        final TextView title, preview, date, location;
+        final View locationRow;
         Holder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.noteTitle);
             preview = itemView.findViewById(R.id.notePreview);
             date = itemView.findViewById(R.id.noteUpdated);
+            location = itemView.findViewById(R.id.noteLocation);
+            locationRow = itemView.findViewById(R.id.noteLocationRow);
         }
     }
 }

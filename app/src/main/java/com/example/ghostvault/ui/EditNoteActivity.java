@@ -1,14 +1,19 @@
 package com.example.ghostvault.ui;
 
+import android.Manifest;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import com.example.ghostvault.R;
 import com.example.ghostvault.data.Disk;
 import com.example.ghostvault.data.GhostDatabase;
 import com.example.ghostvault.data.NoteEntity;
+import com.example.ghostvault.location.LocationHelper;
 import com.example.ghostvault.security.CryptoUtils;
 import com.example.ghostvault.security.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -20,6 +25,11 @@ public final class EditNoteActivity extends BaseSecureActivity {
     private long noteId;
     private EditText title, body;
     private Button save, delete;
+    private View cardLocation, btnRemoveLocation;
+    private TextView txtNoteLocation;
+    private String noteLocation = null;
+    private boolean locationDismissed = false;
+    private ActivityResultLauncher<String[]> locationPermissionLauncher;
     private boolean loaded = false;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +50,82 @@ public final class EditNoteActivity extends BaseSecureActivity {
                 .setMessage("This action cannot be undone.")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Delete", (dialog, which) -> deleteNote()).show());
-        if (noteId <= 0) loaded = true;
+
+        cardLocation = findViewById(R.id.cardLocation);
+        txtNoteLocation = findViewById(R.id.txtNoteLocation);
+        btnRemoveLocation = findViewById(R.id.btnRemoveLocation);
+
+        locationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                result -> {
+                    Boolean fineGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
+                    Boolean coarseGranted = result.get(Manifest.permission.ACCESS_COARSE_LOCATION);
+                    if ((fineGranted != null && fineGranted) || (coarseGranted != null && coarseGranted)) {
+                        acquireLocation();
+                    } else {
+                        txtNoteLocation.setText("Location permission denied (tap to retry)");
+                        btnRemoveLocation.setVisibility(View.GONE);
+                    }
+                });
+
+        cardLocation.setOnClickListener(v -> {
+            if (noteId <= 0 && (locationDismissed || noteLocation == null || noteLocation.isEmpty())) {
+                locationDismissed = false;
+                requestLocation();
+            }
+        });
+
+        btnRemoveLocation.setOnClickListener(v -> {
+            locationDismissed = true;
+            noteLocation = null;
+            txtNoteLocation.setText("No location attached (tap to add)");
+            btnRemoveLocation.setVisibility(View.GONE);
+        });
+
+        if (noteId <= 0) {
+            loaded = true;
+            requestLocation();
+        }
+    }
+
+    private void requestLocation() {
+        if (LocationHelper.hasLocationPermission(this)) {
+            acquireLocation();
+        } else {
+            cardLocation.setVisibility(View.VISIBLE);
+            txtNoteLocation.setText("Requesting location permission…");
+            btnRemoveLocation.setVisibility(View.GONE);
+            locationPermissionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+        }
+    }
+
+    private void acquireLocation() {
+        if (locationDismissed) return;
+        cardLocation.setVisibility(View.VISIBLE);
+        txtNoteLocation.setText("Acquiring location…");
+        btnRemoveLocation.setVisibility(View.VISIBLE);
+        LocationHelper.getCurrentLocation(this, new LocationHelper.Callback() {
+            @Override
+            public void onLocationResolved(String locationInfo) {
+                if (isFinishing() || locationDismissed) return;
+                noteLocation = locationInfo;
+                cardLocation.setVisibility(View.VISIBLE);
+                txtNoteLocation.setText(locationInfo);
+                btnRemoveLocation.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onLocationFailed(String reason) {
+                if (isFinishing() || locationDismissed) return;
+                if (noteLocation == null) {
+                    txtNoteLocation.setText("Location unavailable (" + reason + ")");
+                    btnRemoveLocation.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override protected void onResume() {
@@ -55,21 +140,32 @@ public final class EditNoteActivity extends BaseSecureActivity {
         if (key == null || vault == null) return;
         save.setEnabled(false);
         Disk.run(() -> {
-            String t = null, b = null;
+            String t = null, b = null, loc = null;
             try {
                 NoteEntity entity = GhostDatabase.get(getApplicationContext()).noteDao().find(noteId, vault);
                 if (entity != null) {
                     t = CryptoUtils.decrypt(entity.encryptedTitle, key);
                     b = CryptoUtils.decrypt(entity.encryptedBody, key);
+                    if (entity.encryptedLocation != null && !entity.encryptedLocation.isEmpty()) {
+                        loc = CryptoUtils.decrypt(entity.encryptedLocation, key);
+                    }
                 }
             } catch (Exception ignored) { }
             Arrays.fill(key, (byte) 0);
-            final String foundTitle = t, foundBody = b;
+            final String foundTitle = t, foundBody = b, foundLoc = loc;
             runOnUiThread(() -> {
                 if (isFinishing() || !SessionManager.isOpen()) return;
                 if (foundTitle == null) { Toast.makeText(this, "Note unavailable", Toast.LENGTH_SHORT).show(); finish(); return; }
                 title.setText(foundTitle);
                 body.setText(foundBody);
+                if (foundLoc != null && !foundLoc.isEmpty()) {
+                    noteLocation = foundLoc;
+                    cardLocation.setVisibility(View.VISIBLE);
+                    txtNoteLocation.setText("Created at: " + foundLoc);
+                    btnRemoveLocation.setVisibility(View.GONE);
+                } else {
+                    cardLocation.setVisibility(View.GONE);
+                }
                 loaded = true;
                 save.setEnabled(true);
             });
@@ -95,7 +191,13 @@ public final class EditNoteActivity extends BaseSecureActivity {
                         : new NoteEntity();
                 if (note != null) {
                     long now = System.currentTimeMillis();
-                    if (noteId <= 0) { note.createdAt = now; note.vaultId = vault; }
+                    if (noteId <= 0) {
+                        note.createdAt = now;
+                        note.vaultId = vault;
+                        if (!locationDismissed && noteLocation != null && !noteLocation.trim().isEmpty()) {
+                            note.encryptedLocation = CryptoUtils.encrypt(noteLocation.trim(), key);
+                        }
+                    }
                     note.encryptedTitle = CryptoUtils.encrypt(titleValue, key);
                     note.encryptedBody = CryptoUtils.encrypt(bodyValue, key);
                     note.updatedAt = now;

@@ -195,6 +195,9 @@ public final class CloudActivity extends BaseSecureActivity {
                     Map<String, Object> row = new HashMap<>();
                     row.put("title", note.encryptedTitle);
                     row.put("body", note.encryptedBody);
+                    if (note.encryptedLocation != null) {
+                        row.put("location", note.encryptedLocation);
+                    }
                     row.put("createdAt", note.createdAt);
                     row.put("updatedAt", note.updatedAt);
                     records.put(Long.toString(note.id), row);
@@ -323,6 +326,7 @@ public final class CloudActivity extends BaseSecureActivity {
                 for (DataSnapshot child : notesNode.getChildren()) {
                     String titleCipher = child.child("title").getValue(String.class);
                     String bodyCipher = child.child("body").getValue(String.class);
+                    String locCipher = child.child("location").getValue(String.class);
                     Long createdAt = child.child("createdAt").getValue(Long.class);
                     Long updatedAt = child.child("updatedAt").getValue(Long.class);
 
@@ -338,9 +342,14 @@ public final class CloudActivity extends BaseSecureActivity {
                         String plainBody = CryptoUtils.decrypt(bodyCipher, backupKey);
                         entity.encryptedTitle = CryptoUtils.encrypt(plainTitle, activeKey);
                         entity.encryptedBody = CryptoUtils.encrypt(plainBody, activeKey);
+                        if (locCipher != null) {
+                            String plainLoc = CryptoUtils.decrypt(locCipher, backupKey);
+                            entity.encryptedLocation = CryptoUtils.encrypt(plainLoc, activeKey);
+                        }
                     } else {
                         entity.encryptedTitle = titleCipher;
                         entity.encryptedBody = bodyCipher;
+                        entity.encryptedLocation = locCipher;
                     }
 
                     GhostDatabase.get(getApplicationContext()).noteDao().insert(entity);

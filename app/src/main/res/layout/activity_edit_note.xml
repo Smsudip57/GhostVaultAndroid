@@ -19,6 +19,54 @@
                     android:layout_height="wrap_content" android:singleLine="true"
                     android:inputType="textCapSentences" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardElevation="0dp"
+                android:visibility="gone">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+                    <ImageView
+                        android:id="@+id/imgLocationIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_location"
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="Location" />
+                    <TextView
+                        android:id="@+id/txtNoteLocation"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:textSize="13sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="2"
+                        android:ellipsize="end" />
+                    <ImageView
+                        android:id="@+id/btnRemoveLocation"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:padding="8dp"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        app:tint="?attr/colorOnSurfaceVariant"
+                        android:contentDescription="Remove location"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="18dp" android:hint="Your note"

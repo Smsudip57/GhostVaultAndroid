@@ -86,6 +86,20 @@ public final class CryptoUtils {
         return new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
     }
 
-    public static String toBase64(byte[] bytes) { return Base64.encodeToString(bytes, Base64.NO_WRAP); }
-    public static byte[] fromBase64(String text) { return Base64.decode(text, Base64.NO_WRAP); }
+    public static String toBase64(byte[] bytes) {
+        if (bytes == null) return null;
+        try {
+            return Base64.encodeToString(bytes, Base64.NO_WRAP);
+        } catch (Throwable t) {
+            return java.util.Base64.getEncoder().encodeToString(bytes);
+        }
+    }
+    public static byte[] fromBase64(String text) {
+        if (text == null) return null;
+        try {
+            return Base64.decode(text, Base64.NO_WRAP);
+        } catch (Throwable t) {
+            return java.util.Base64.getDecoder().decode(text);
+        }
+    }
 }

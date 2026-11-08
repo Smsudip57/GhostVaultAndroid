@@ -88,9 +88,15 @@ public final class NotesActivity extends BaseSecureActivity {
                 for (NoteEntity note : GhostDatabase.get(getApplicationContext()).noteDao().allInVault(vault)) {
                     String title = CryptoUtils.decrypt(note.encryptedTitle, key);
                     String body = CryptoUtils.decrypt(note.encryptedBody, key);
+                    String location = null;
+                    if (note.encryptedLocation != null && !note.encryptedLocation.isEmpty()) {
+                        try {
+                            location = CryptoUtils.decrypt(note.encryptedLocation, key);
+                        } catch (Exception ignored) { }
+                    }
                     String preview = body.replace('\n', ' ').trim();
                     if (preview.length() > 110) preview = preview.substring(0, 110) + "…";
-                    items.add(new NotesAdapter.Entry(note.id, title, preview, note.updatedAt));
+                    items.add(new NotesAdapter.Entry(note.id, title, preview, location, note.updatedAt));
                 }
             } catch (Exception e) { good = false; }
             Arrays.fill(key, (byte) 0);
